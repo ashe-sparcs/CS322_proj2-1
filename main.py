@@ -5,17 +5,17 @@ class ENfa:
     state = []
     symbol = []
     func_dict = {}
-    func_string_list = []
+    # func_string_list = []
     initial = []
     final = []
     todo_queue = []
     done_list = []
-    done_dict = {}
+    done_func_dict = {}
 
     def __init__(self, state, symbol, func_string_list, initial, final):
         self.state = state
         self.symbol = symbol
-        self.func_string_list = func_string_list
+        # self.func_string_list = func_string_list
         for q in state:
             self.func_dict[q] = {}
             self.func_dict[q]['E'] = {}
@@ -24,11 +24,16 @@ class ENfa:
             self.func_dict[func_string_split[0]][func_string_split[1]] = func_string_split[2]
         self.initial = list(initial)
         self.final = final
-        self.todo_queue = self.e_closure(self.initial)
+        self.todo_queue.append(self.e_closure(self.initial))
         self.done_list = list(self.todo_queue)
 
     def transition(self, from_state, input_symbol):
-        return self.func_dict[from_state][input_symbol]
+        print(self.func_dict)
+        print(from_state)
+        print(input_symbol)
+        if input_symbol in self.func_dict[from_state]:
+            return self.func_dict[from_state][input_symbol]
+        return False
 
     def e_closure(self, substate):
         result = list(substate)
@@ -39,11 +44,17 @@ class ENfa:
     def convert_to_dfa(self):
         while self.todo_queue:
             from_substate = self.todo_queue.pop(0)
-            to_substate = []
-            for fs in from_substate:
-                for sym in self.symbol:
-                    to_substate.append(self.transition(fs, sym))
-            to_substate = self.e_closure(to_substate)
+            for sym in self.symbol:
+                to_substate = []
+                for fs in from_substate:
+                    if self.transition(fs, sym):
+                        to_substate.append(self.transition(fs, sym))
+                to_substate = self.e_closure(to_substate)
+                if to_substate not in self.done_list:
+                    self.done_list.append(list(to_substate))
+                    self.todo_queue.append(list(to_substate))
+                    self.done_func_dict[list(from_substate)][sym] = list(to_substate)
+        print(self.done_dict)
 
     def print_self(self):
         print('State')
@@ -103,7 +114,7 @@ def main():
     # dfa.print_self()
 
     e_nfa = ENfa(q, sigma, func_string_list, q0, f)
-    print(e_nfa.e_closure(e_nfa.initial))
+    e_nfa.convert_to_dfa()
 
 
 main()
