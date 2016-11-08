@@ -11,6 +11,7 @@ class ENfa:
     todo_queue = []
     state_converting = []
     func_dict_converting = {} # state_converting and func_dict_converting should have same length, same order.
+    distinguishable = []
 
     def __init__(self, state, symbol, func_string_list, initial, final):
         self.state = state
@@ -36,7 +37,7 @@ class ENfa:
         result = list(substate)
         for ss in substate:
             result.append(self.transition(ss, 'E'))
-        return sorted(result)
+        return my_sorted(result)
 
     def rename(self):
         # renaming
@@ -68,7 +69,6 @@ class ENfa:
                     print('hey')
                     self.final.append(self.state[self.state_converting.index(s_list)])
 
-
     def convert_to_dfa(self):
         # converting
         while self.todo_queue:
@@ -95,6 +95,12 @@ class ENfa:
         print(self.func_dict)
         print(self.initial)
         print(self.final)
+# TODO : sorted problem.
+    def minimize(self):
+        for s1 in self.state:
+            for s2 in self.state:
+                if s1 in self.final and s2 not in self.final:
+                    self.distinguishable.append(my_sorted([s1, s2]))
 
     def print_self(self):
         print('State')
@@ -106,7 +112,7 @@ class ENfa:
         for func_string in self.func_string_list:
             print(func_string)
         '''
-        for q in sorted(list(self.func_dict.keys())):
+        for q in my_sorted(list(self.func_dict.keys())):
             for sym in sorted(list(self.func_dict[q])):
                 print(q + ',' + sym + ',' + self.transition(q, sym))
         print('Initial state')
@@ -126,6 +132,15 @@ class Dfa(ENfa):
 
     def minimize(self):
         pass
+
+
+def my_sorted(state_list):
+    for i in range(len(state_list)):
+        state_list[i] = int(state_list[i][1:])
+    state_list = sorted(state_list)
+    for i in range(len(state_list)):
+        state_list[i] = 'q' + str(state_list[i])
+    return list(state_list)
 
 
 def main():
