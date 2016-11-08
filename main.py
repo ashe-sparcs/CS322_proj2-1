@@ -9,8 +9,8 @@ class ENfa:
     initial = []
     final = []
     todo_queue = []
-    done_list = []
-    done_func_dict = {}
+    state_converting = []
+    func_dict_converting = {} # state_converting and func_dict_converting should have same length, same order.
 
     def __init__(self, state, symbol, func_string_list, initial, final):
         self.state = state
@@ -25,12 +25,9 @@ class ENfa:
         self.initial = list(initial)
         self.final = final
         self.todo_queue.append(self.e_closure(self.initial))
-        self.done_list = list(self.todo_queue)
+        self.state_converting = list(self.todo_queue)
 
     def transition(self, from_state, input_symbol):
-        print(self.func_dict)
-        print(from_state)
-        print(input_symbol)
         if input_symbol in self.func_dict[from_state]:
             return self.func_dict[from_state][input_symbol]
         return False
@@ -39,7 +36,7 @@ class ENfa:
         result = list(substate)
         for ss in substate:
             result.append(self.transition(ss, 'E'))
-        return result
+        return sorted(result)
 
     def convert_to_dfa(self):
         while self.todo_queue:
@@ -49,12 +46,18 @@ class ENfa:
                 for fs in from_substate:
                     if self.transition(fs, sym):
                         to_substate.append(self.transition(fs, sym))
-                to_substate = self.e_closure(to_substate)
-                if to_substate not in self.done_list:
-                    self.done_list.append(list(to_substate))
-                    self.todo_queue.append(list(to_substate))
-                    self.done_func_dict[list(from_substate)][sym] = list(to_substate)
-        print(self.done_dict)
+                if to_substate:
+                    to_substate = self.e_closure(to_substate)
+                if to_substate and (to_substate not in self.state_converting):
+                    self.state_converting.append(list(to_substate))
+                    if to_substate not in self.todo_queue:
+                        self.todo_queue.append(list(to_substate))
+                    print(self.state_converting)
+                    print(self.func_dict_converting)
+                    if self.func_dict_converting.get(tuple(to_substate)) is None:
+                        self.func_dict_converting[tuple(to_substate)] = {}
+                    self.func_dict_converting[tuple(to_substate)][sym] = list(to_substate)
+        print(self.func_dict_converting)
 
     def print_self(self):
         print('State')
