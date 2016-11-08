@@ -66,7 +66,6 @@ class ENfa:
                 self.initial.append(self.state[self.state_converting.index(s_list)])
             for s in s_list:
                 if s in final_copy:
-                    print('hey')
                     self.final.append(self.state[self.state_converting.index(s_list)])
 
     def convert_to_dfa(self):
@@ -91,11 +90,13 @@ class ENfa:
 
         self.rename()
 
+        '''
         print(self.state)
         print(self.func_dict)
         print(self.initial)
         print(self.final)
-# TODO : sorted problem.
+        '''
+
     def minimize(self):
         for s1 in self.state:
             for s2 in self.state:
@@ -135,12 +136,14 @@ class Dfa(ENfa):
 
 
 def my_sorted(state_list):
+    print(state_list)
     for i in range(len(state_list)):
+        print(state_list[i][1:])
         state_list[i] = int(state_list[i][1:])
     state_list = sorted(state_list)
     for i in range(len(state_list)):
         state_list[i] = 'q' + str(state_list[i])
-    return list(state_list)
+    return state_list
 
 
 def main():
@@ -170,6 +173,7 @@ def main():
 
     e_nfa = ENfa(q, sigma, func_string_list, q0, f)
     e_nfa.convert_to_dfa()
+    e_nfa.print_self()
 
 
 main()
