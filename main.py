@@ -23,9 +23,13 @@ class ENfa:
         # self.func_string_list = func_string_list
         for q in state:
             self.func_dict[q] = {}
-            self.func_dict[q]['E'] = {}
+            # self.func_dict[q]['E'] = {}
         for func_string in func_string_list:
             func_string_split = func_string.split(',')
+            print('func_string_split : ')
+            print(func_string_split[0])
+            print(func_string_split[1])
+            print(func_string_split[2])
             self.func_dict[func_string_split[0]][func_string_split[1]] = func_string_split[2]
         self.initial = list(initial)
         self.final = final
@@ -40,7 +44,8 @@ class ENfa:
     def e_closure(self, substate):
         result = list(substate)
         for ss in substate:
-            result.append(self.transition(ss, 'E'))
+            if self.transition(ss, 'E'):
+                result.append(self.transition(ss, 'E'))
         return my_sorted(result)
 
     def rename_converting(self):
@@ -98,7 +103,7 @@ class ENfa:
                 self.initial = []
                 self.initial.append(self.state[self.state_aggregating.index(s_list)])
             for s in s_list:
-                if s in final_copy:
+                if s in final_copy and s not in self.final:
                     self.final.append(self.state[self.state_aggregating.index(s_list)])
 
     def convert_to_dfa(self):
@@ -118,17 +123,11 @@ class ENfa:
                         self.todo_queue.append(list(to_substate))
                 if self.func_dict_converting.get(tuple(from_substate)) is None:
                     self.func_dict_converting[tuple(from_substate)] = {}
-                self.func_dict_converting[tuple(from_substate)][sym] = list(to_substate)
+                if to_substate:
+                    self.func_dict_converting[tuple(from_substate)][sym] = list(to_substate)
             self.todo_queue.pop(0)
 
         self.rename_converting()
-
-        '''
-        print(self.state)
-        print(self.func_dict)
-        print(self.initial)
-        print(self.final)
-        '''
 
     def minimize(self):
         end_flag = True
@@ -170,7 +169,8 @@ class ENfa:
             for substate in self.state_aggregating:
                 self.func_dict_aggregating[tuple(substate)] = {}
                 for sym in self.symbol:
-                    self.func_dict_aggregating[tuple(substate)][sym] = self.belong_dict[self.transition(substate[0], sym)]
+                    if self.transition(substate[0], sym):
+                        self.func_dict_aggregating[tuple(substate)][sym] = self.belong_dict[self.transition(substate[0], sym)]
             self.rename_aggregating()
 
     def is_distinguishable(self, pair):
@@ -185,10 +185,6 @@ class ENfa:
         print('Input symbol')
         print(','.join(self.symbol))
         print('State transition function')
-        '''
-        for func_string in self.func_string_list:
-            print(func_string)
-        '''
         for q in my_sorted(list(self.func_dict.keys())):
             for sym in sorted(list(self.func_dict[q])):
                 print(q + ',' + sym + ',' + self.transition(q, sym))
@@ -240,9 +236,15 @@ def main():
     # dfa.print_self()
 
     e_nfa = ENfa(q, sigma, func_string_list, q0, f)
-    e_nfa.convert_to_dfa()
+    print('self.func_dict :')
+    print(e_nfa.func_dict)
     e_nfa.print_self()
-    print('After minimize')
+    print('@@@@@@@@@@@@@@@@@')
+    e_nfa.convert_to_dfa()
+    print('converted self.func_dict :')
+    print(e_nfa.func_dict)
+    e_nfa.print_self()
+    print('@@@@@@@@@@@@@@@@@')
     e_nfa.minimize()
     e_nfa.print_self()
 
