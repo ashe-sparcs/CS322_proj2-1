@@ -10,7 +10,9 @@ class ENfa:
     final = []
     todo_queue = []
     state_converting = []
+    state_aggregating = []
     func_dict_converting = {}  # state_converting and func_dict_converting should have same length, same order.
+    func_dict_aggregating = {}
     indistinguishable = []
     distinguishable = []
     belong_dict = {}
@@ -31,8 +33,6 @@ class ENfa:
         self.state_converting = list(self.todo_queue)
 
     def transition(self, from_state, input_symbol):
-        print(self.func_dict)
-        print(from_state)
         if input_symbol in self.func_dict[from_state]:
             return self.func_dict[from_state][input_symbol]
         return False
@@ -43,7 +43,7 @@ class ENfa:
             result.append(self.transition(ss, 'E'))
         return my_sorted(result)
 
-    def rename(self):
+    def rename_converting(self):
         # renaming
         self.state = []
         for i in range(len(self.state_converting)):
@@ -72,6 +72,35 @@ class ENfa:
                 if s in final_copy:
                     self.final.append(self.state[self.state_converting.index(s_list)])
 
+    def rename_aggregating(self):
+        # renaming
+        self.state = []
+        for i in range(len(self.state_aggregating)):
+            self.state.append('q'+str(i))
+        self.func_dict = {}
+        self.func_dict_aggregating = list(self.func_dict_aggregating.items())
+        for j in range(len(self.func_dict_aggregating)):
+            self.func_dict_aggregating[j] = list(self.func_dict_aggregating[j])
+            self.func_dict_aggregating[j][0] = self.state[self.state_aggregating.index(list(self.func_dict_aggregating[j][0]))]
+            self.func_dict_aggregating[j][1] = list(self.func_dict_aggregating[j][1].items())
+            for k in range(len(self.func_dict_aggregating[j][1])):
+                self.func_dict_aggregating[j][1][k] = list(self.func_dict_aggregating[j][1][k])
+                self.func_dict_aggregating[j][1][k][1] = self.state[self.state_aggregating.index(self.func_dict_aggregating[j][1][k][1])]
+        self.func_dict = list(self.func_dict_aggregating)
+        for i in range(len(self.func_dict)):
+            self.func_dict[i][1] = dict(self.func_dict[i][1])
+
+        self.func_dict = dict(self.func_dict_aggregating)
+        final_copy = list(self.final)
+        self.final = []
+        for s_list in self.state_aggregating:
+            if self.initial[0] in s_list:
+                self.initial = []
+                self.initial.append(self.state[self.state_aggregating.index(s_list)])
+            for s in s_list:
+                if s in final_copy:
+                    self.final.append(self.state[self.state_aggregating.index(s_list)])
+
     def convert_to_dfa(self):
         # converting
         while self.todo_queue:
@@ -92,7 +121,7 @@ class ENfa:
                 self.func_dict_converting[tuple(from_substate)][sym] = list(to_substate)
             self.todo_queue.pop(0)
 
-        self.rename()
+        self.rename_converting()
 
         '''
         print(self.state)
@@ -128,7 +157,7 @@ class ENfa:
             if s in pair:
                 substate.append(pair[1])
                 self.belong_dict[pair[1]] = substate
-        self.state_converting.append(substate)
+        self.state_aggregating.append(substate)
         indistinguishable_copy = list(self.indistinguishable)
         self.indistinguishable = []
         for pair in indistinguishable_copy:
@@ -138,12 +167,11 @@ class ENfa:
             self.aggregate()
         else:
             self.func_dict_converting = {}
-            print('state_converting '+str(self.state_converting))
-            for substate in self.state_converting:
-                self.func_dict_converting[tuple(substate)] = {}
+            for substate in self.state_aggregating:
+                self.func_dict_aggregating[tuple(substate)] = {}
                 for sym in self.symbol:
-                    self.func_dict_converting[tuple(substate)][sym] = self.belong_dict[self.transition(substate[0], sym)]
-            self.rename()
+                    self.func_dict_aggregating[tuple(substate)][sym] = self.belong_dict[self.transition(substate[0], sym)]
+            self.rename_aggregating()
 
     def is_distinguishable(self, pair):
         for sym in self.symbol:
@@ -213,6 +241,8 @@ def main():
 
     e_nfa = ENfa(q, sigma, func_string_list, q0, f)
     e_nfa.convert_to_dfa()
+    e_nfa.print_self()
+    print('After minimize')
     e_nfa.minimize()
     e_nfa.print_self()
 
