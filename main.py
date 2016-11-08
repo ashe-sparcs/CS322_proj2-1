@@ -56,15 +56,29 @@ class ENfa:
                     self.func_dict_converting[tuple(from_substate)] = {}
                 self.func_dict_converting[tuple(from_substate)][sym] = list(to_substate)
             self.todo_queue.pop(0)
-        print(self.state_converting)
-        print(self.func_dict_converting)
         self.state = []
         for i in range(len(self.state_converting)):
             self.state.append('q'+str(i))
         self.func_dict = {}
-        for from_substate in self.func_dict_converting.keys():
-            from_substate = list(from_substate)
-            # self.func_dict
+        self.func_dict_converting = list(self.func_dict_converting.items())
+        for j in range(len(self.func_dict_converting)):
+            self.func_dict_converting[j] = list(self.func_dict_converting[j])
+            self.func_dict_converting[j][0] = self.state[self.state_converting.index(list(self.func_dict_converting[j][0]))]
+            self.func_dict_converting[j][1] = list(self.func_dict_converting[j][1].items())
+            for k in range(len(self.func_dict_converting[j][1])):
+                self.func_dict_converting[j][1][k] = list(self.func_dict_converting[j][1][k])
+                self.func_dict_converting[j][1][k][1] = self.state[self.state_converting.index(self.func_dict_converting[j][1][k][1])]
+        self.func_dict = list(self.func_dict_converting)
+        for i in range(len(self.func_dict)):
+            self.func_dict[i][1] = dict(self.func_dict[i][1])
+
+        self.func_dict = dict(self.func_dict_converting)
+        for s_list in self.state_converting:
+            if self.initial[0] in s_list:
+                self.initial = []
+                self.initial.append(self.state[self.state_converting.index(s_list)])
+            for 
+        print(self.func_dict)
 
     def print_self(self):
         print('State')
