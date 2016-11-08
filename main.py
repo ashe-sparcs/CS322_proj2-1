@@ -10,9 +10,10 @@ class ENfa:
     final = []
     todo_queue = []
     state_converting = []
-    func_dict_converting = {} # state_converting and func_dict_converting should have same length, same order.
+    func_dict_converting = {}  # state_converting and func_dict_converting should have same length, same order.
     indistinguishable = []
     distinguishable = []
+    belong_dict = {}
 
     def __init__(self, state, symbol, func_string_list, initial, final):
         self.state = state
@@ -30,6 +31,8 @@ class ENfa:
         self.state_converting = list(self.todo_queue)
 
     def transition(self, from_state, input_symbol):
+        print(self.func_dict)
+        print(from_state)
         if input_symbol in self.func_dict[from_state]:
             return self.func_dict[from_state][input_symbol]
         return False
@@ -105,7 +108,7 @@ class ENfa:
                 for s2 in self.state:
                     if (s1 in self.final and s2 in self.final) or (s1 not in self.final and s2 not in self.final):
                         self.indistinguishable.append(my_sorted([s1, s2]))
-                    else
+                    else:
                         self.distinguishable.append(my_sorted([s1, s2]))
         else:
             for i in range(len(self.indistinguishable)):
@@ -115,7 +118,32 @@ class ENfa:
         if not end_flag:
             self.minimize()
         else:
-            
+            self.aggregate()
+
+    def aggregate(self):
+        s = self.indistinguishable[0][0]
+        substate = [s]
+        self.belong_dict[s] = substate
+        for pair in self.indistinguishable:
+            if s in pair:
+                substate.append(pair[1])
+                self.belong_dict[pair[1]] = substate
+        self.state_converting.append(substate)
+        indistinguishable_copy = list(self.indistinguishable)
+        self.indistinguishable = []
+        for pair in indistinguishable_copy:
+            if (pair[0] not in substate) and (pair[1] not in substate):
+                self.indistinguishable.append(pair)
+        if self.indistinguishable:
+            self.aggregate()
+        else:
+            self.func_dict_converting = {}
+            print('state_converting '+str(self.state_converting))
+            for substate in self.state_converting:
+                self.func_dict_converting[tuple(substate)] = {}
+                for sym in self.symbol:
+                    self.func_dict_converting[tuple(substate)][sym] = self.belong_dict[self.transition(substate[0], sym)]
+            self.rename()
 
     def is_distinguishable(self, pair):
         for sym in self.symbol:
@@ -148,17 +176,9 @@ class Dfa(ENfa):
         for key in list(self.func_dict.keys()):
             del self.func_dict[key]['E']
 
-    def rename(self):
-        pass
-
-    def minimize(self):
-        pass
-
 
 def my_sorted(state_list):
-    print(state_list)
     for i in range(len(state_list)):
-        print(state_list[i][1:])
         state_list[i] = int(state_list[i][1:])
     state_list = sorted(state_list)
     for i in range(len(state_list)):
@@ -193,6 +213,7 @@ def main():
 
     e_nfa = ENfa(q, sigma, func_string_list, q0, f)
     e_nfa.convert_to_dfa()
+    e_nfa.minimize()
     e_nfa.print_self()
 
 
