@@ -1,0 +1,23 @@
+State
+A,B,C,D,E,F,G
+Input symbol
+0,1
+State transition function
+A,0,B
+A,1,A
+B,1,A
+B,0,C
+C,0,D
+C,1,E
+D,0,D
+D,1,F
+E,0,F
+E,1,E
+F,0,F
+F,1,E
+G,0,C
+G,1,D
+Initial state
+A
+Final state
+E,F

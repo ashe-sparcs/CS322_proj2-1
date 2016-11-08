@@ -1,0 +1,15 @@
+State
+d0,d1,d2
+Input symbol
+0,1
+State transition function
+d0,0,d0
+d0,1,d1
+d1,0,d1
+d1,1,d2
+d2,0,d2
+d2,1,d2
+Initial state
+d0
+Final state
+d1
