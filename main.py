@@ -38,26 +38,7 @@ class ENfa:
             result.append(self.transition(ss, 'E'))
         return sorted(result)
 
-    def convert_to_dfa(self):
-        # converting
-        while self.todo_queue:
-            from_substate = self.todo_queue[0]
-            for sym in self.symbol:
-                to_substate = []
-                for fs in from_substate:
-                    if self.transition(fs, sym):
-                        to_substate.append(self.transition(fs, sym))
-                if to_substate:
-                    to_substate = self.e_closure(to_substate)
-                if to_substate and (to_substate not in self.state_converting):
-                    self.state_converting.append(list(to_substate))
-                    if to_substate not in self.todo_queue:
-                        self.todo_queue.append(list(to_substate))
-                if self.func_dict_converting.get(tuple(from_substate)) is None:
-                    self.func_dict_converting[tuple(from_substate)] = {}
-                self.func_dict_converting[tuple(from_substate)][sym] = list(to_substate)
-            self.todo_queue.pop(0)
-
+    def rename(self):
         # renaming
         self.state = []
         for i in range(len(self.state_converting)):
@@ -86,6 +67,29 @@ class ENfa:
                 if s in final_copy:
                     print('hey')
                     self.final.append(self.state[self.state_converting.index(s_list)])
+
+
+    def convert_to_dfa(self):
+        # converting
+        while self.todo_queue:
+            from_substate = self.todo_queue[0]
+            for sym in self.symbol:
+                to_substate = []
+                for fs in from_substate:
+                    if self.transition(fs, sym):
+                        to_substate.append(self.transition(fs, sym))
+                if to_substate:
+                    to_substate = self.e_closure(to_substate)
+                if to_substate and (to_substate not in self.state_converting):
+                    self.state_converting.append(list(to_substate))
+                    if to_substate not in self.todo_queue:
+                        self.todo_queue.append(list(to_substate))
+                if self.func_dict_converting.get(tuple(from_substate)) is None:
+                    self.func_dict_converting[tuple(from_substate)] = {}
+                self.func_dict_converting[tuple(from_substate)][sym] = list(to_substate)
+            self.todo_queue.pop(0)
+
+        self.rename()
 
         print(self.state)
         print(self.func_dict)
