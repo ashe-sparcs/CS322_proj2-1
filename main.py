@@ -11,6 +11,7 @@ class ENfa:
     todo_queue = []
     state_converting = []
     func_dict_converting = {} # state_converting and func_dict_converting should have same length, same order.
+    indistinguishable = []
     distinguishable = []
 
     def __init__(self, state, symbol, func_string_list, initial, final):
@@ -98,10 +99,29 @@ class ENfa:
         '''
 
     def minimize(self):
-        for s1 in self.state:
-            for s2 in self.state:
-                if s1 in self.final and s2 not in self.final:
-                    self.distinguishable.append(my_sorted([s1, s2]))
+        end_flag = True
+        if not self.indistinguishable:
+            for s1 in self.state:
+                for s2 in self.state:
+                    if (s1 in self.final and s2 in self.final) or (s1 not in self.final and s2 not in self.final):
+                        self.indistinguishable.append(my_sorted([s1, s2]))
+                    else
+                        self.distinguishable.append(my_sorted([s1, s2]))
+        else:
+            for i in range(len(self.indistinguishable)):
+                if self.is_distinguishable(self.indistinguishable[i]):
+                    self.distinguishable.append(self.indistinguishable.pop(i))
+                    end_flag = False
+        if not end_flag:
+            self.minimize()
+        else:
+            
+
+    def is_distinguishable(self, pair):
+        for sym in self.symbol:
+            if my_sorted([self.transition(pair[0], sym), self.transition(pair[1], sym)]) in self.distinguishable:
+                return True
+        return False
 
     def print_self(self):
         print('State')
