@@ -145,9 +145,11 @@ class ENfa:
             for s1 in self.state:
                 for s2 in self.state:
                     if (s1 in self.final and s2 in self.final) or (s1 not in self.final and s2 not in self.final):
-                        self.indistinguishable.append(my_sorted([s1, s2]))
+                        if my_sorted([s1, s2]) not in self.indistinguishable:
+                            self.indistinguishable.append(my_sorted([s1, s2]))
                     else:
-                        self.distinguishable.append(my_sorted([s1, s2]))
+                        if my_sorted([s1, s2]) not in self.distinguishable:
+                            self.distinguishable.append(my_sorted([s1, s2]))
         else:
             for i in range(len(self.indistinguishable)):
                 if self.is_distinguishable(self.indistinguishable[i]):
@@ -159,6 +161,8 @@ class ENfa:
             self.aggregate()
 
     def aggregate(self):
+        print('self.indistinguishable : ')
+        print(self.indistinguishable)
         s = self.indistinguishable[0][0]
         substate = [s]
         self.belong_dict[s] = substate
@@ -247,8 +251,6 @@ def main():
 
     e_nfa = ENfa(q, sigma, func_string_list, q0, f)
     e_nfa.convert_to_dfa()
-    print('e_nfa.func_dict : ')
-    print(e_nfa.func_dict)
     e_nfa.print_self()
     print('@@@@@@@@@@@@@@@@@')
     e_nfa.minimize()
