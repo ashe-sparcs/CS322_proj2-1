@@ -26,11 +26,9 @@ class ENfa:
             # self.func_dict[q]['E'] = {}
         for func_string in func_string_list:
             func_string_split = func_string.split(',')
-            print('func_string_split : ')
-            print(func_string_split[0])
-            print(func_string_split[1])
-            print(func_string_split[2])
-            self.func_dict[func_string_split[0]][func_string_split[1]] = func_string_split[2]
+            if func_string_split[1] not in self.func_dict[func_string_split[0]].keys():
+                self.func_dict[func_string_split[0]][func_string_split[1]] = []
+            self.func_dict[func_string_split[0]][func_string_split[1]].append(func_string_split[2])
         self.initial = list(initial)
         self.final = final
         self.todo_queue.append(self.e_closure(self.initial))
@@ -44,8 +42,13 @@ class ENfa:
     def e_closure(self, substate):
         result = list(substate)
         for ss in substate:
-            if self.transition(ss, 'E'):
-                result.append(self.transition(ss, 'E'))
+            closure = self.transition(ss, 'E')
+            if not closure:
+                continue
+            elif isinstance(closure, list):
+                result = result + self.transition(ss, 'E')
+            else:
+                result.append(closure)
         return my_sorted(result)
 
     def rename_converting(self):
@@ -113,8 +116,13 @@ class ENfa:
             for sym in self.symbol:
                 to_substate = []
                 for fs in from_substate:
-                    if self.transition(fs, sym):
-                        to_substate.append(self.transition(fs, sym))
+                    transition = self.transition(fs, sym)
+                    if not transition:
+                        pass
+                    elif isinstance(transition, list):
+                        to_substate = to_substate + transition
+                    else:
+                        to_substate.append(transition)
                 if to_substate:
                     to_substate = self.e_closure(to_substate)
                 if to_substate and (to_substate not in self.state_converting):
@@ -132,6 +140,8 @@ class ENfa:
     def minimize(self):
         end_flag = True
         if not self.indistinguishable:
+            print('self.state : ')
+            print(self.state)
             for s1 in self.state:
                 for s2 in self.state:
                     if (s1 in self.final and s2 in self.final) or (s1 not in self.final and s2 not in self.final):
@@ -236,12 +246,8 @@ def main():
     # dfa.print_self()
 
     e_nfa = ENfa(q, sigma, func_string_list, q0, f)
-    print('self.func_dict :')
-    print(e_nfa.func_dict)
-    e_nfa.print_self()
-    print('@@@@@@@@@@@@@@@@@')
     e_nfa.convert_to_dfa()
-    print('converted self.func_dict :')
+    print('e_nfa.func_dict : ')
     print(e_nfa.func_dict)
     e_nfa.print_self()
     print('@@@@@@@@@@@@@@@@@')
