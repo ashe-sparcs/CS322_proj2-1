@@ -40,7 +40,7 @@ class ENfa:
 
     def convert_to_dfa(self):
         while self.todo_queue:
-            from_substate = self.todo_queue.pop(0)
+            from_substate = self.todo_queue[0]
             for sym in self.symbol:
                 to_substate = []
                 for fs in from_substate:
@@ -52,12 +52,19 @@ class ENfa:
                     self.state_converting.append(list(to_substate))
                     if to_substate not in self.todo_queue:
                         self.todo_queue.append(list(to_substate))
-                    print(self.state_converting)
-                    print(self.func_dict_converting)
-                    if self.func_dict_converting.get(tuple(to_substate)) is None:
-                        self.func_dict_converting[tuple(to_substate)] = {}
-                    self.func_dict_converting[tuple(to_substate)][sym] = list(to_substate)
+                if self.func_dict_converting.get(tuple(from_substate)) is None:
+                    self.func_dict_converting[tuple(from_substate)] = {}
+                self.func_dict_converting[tuple(from_substate)][sym] = list(to_substate)
+            self.todo_queue.pop(0)
+        print(self.state_converting)
         print(self.func_dict_converting)
+        self.state = []
+        for i in range(len(self.state_converting)):
+            self.state.append('q'+str(i))
+        self.func_dict = {}
+        for from_substate in self.func_dict_converting.keys():
+            from_substate = list(from_substate)
+            # self.func_dict
 
     def print_self(self):
         print('State')
