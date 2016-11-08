@@ -39,6 +39,7 @@ class ENfa:
         return sorted(result)
 
     def convert_to_dfa(self):
+        # converting
         while self.todo_queue:
             from_substate = self.todo_queue[0]
             for sym in self.symbol:
@@ -56,6 +57,8 @@ class ENfa:
                     self.func_dict_converting[tuple(from_substate)] = {}
                 self.func_dict_converting[tuple(from_substate)][sym] = list(to_substate)
             self.todo_queue.pop(0)
+
+        # renaming
         self.state = []
         for i in range(len(self.state_converting)):
             self.state.append('q'+str(i))
@@ -73,12 +76,21 @@ class ENfa:
             self.func_dict[i][1] = dict(self.func_dict[i][1])
 
         self.func_dict = dict(self.func_dict_converting)
+        final_copy = list(self.final)
+        self.final = []
         for s_list in self.state_converting:
             if self.initial[0] in s_list:
                 self.initial = []
                 self.initial.append(self.state[self.state_converting.index(s_list)])
-            for 
+            for s in s_list:
+                if s in final_copy:
+                    print('hey')
+                    self.final.append(self.state[self.state_converting.index(s_list)])
+
+        print(self.state)
         print(self.func_dict)
+        print(self.initial)
+        print(self.final)
 
     def print_self(self):
         print('State')
