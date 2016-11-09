@@ -147,11 +147,12 @@ class ENfa:
                     if (s1 not in self.final and s2 in self.final) or (s1 in self.final and s2 not in self.final):
                         if my_sorted([s1, s2]) not in self.distinguishable:
                             self.distinguishable.append(my_sorted([s1, s2]))
+                            end_flag = False
         else:
             for s1 in self.state:
                 for s2 in self.state:
-                    if self.is_distinguishable(my_sorted([s1, s2])):
-                        if my_sorted([s1, s2]) not in self.distinguishable:
+                    if my_sorted([s1, s2]) not in self.distinguishable:
+                        if self.is_distinguishable([s1, s2]):
                             self.distinguishable.append(my_sorted([s1, s2]))
                             end_flag = False
         if not end_flag:
@@ -172,10 +173,6 @@ class ENfa:
         return m_list
 
     def aggregate(self):
-        print('self.indistinguishable : ')
-        print(self.indistinguishable)
-        print('self.distinguishable : ')
-        print(self.distinguishable)
         self.state_aggregating = [set(i) for i in self.indistinguishable if i]
         self.find_intersection(self.state_aggregating)
         self.state_aggregating = [list(i) for i in self.state_aggregating if i]
@@ -198,7 +195,9 @@ class ENfa:
 
     def is_distinguishable(self, pair):
         for sym in self.symbol:
-            if my_sorted([self.transition(pair[0], sym), self.transition(pair[1], sym)]) in self.distinguishable:
+            transition1 = self.transition(pair[0], sym)
+            transition2 = self.transition(pair[1], sym)
+            if my_sorted([transition1, transition2]) in self.distinguishable:
                 return True
         return False
 
@@ -225,6 +224,8 @@ class Dfa(ENfa):
 
 
 def my_sorted(state_list):
+    if False in state_list:
+        return state_list
     for i in range(len(state_list)):
         state_list[i] = int(state_list[i][1:])
     state_list = sorted(state_list)
@@ -233,7 +234,8 @@ def my_sorted(state_list):
     return state_list
 
 
-
+def xor(b1, b2):
+    return (b1 and not b2) or (not b1 and b2)
 
 
 def main():
