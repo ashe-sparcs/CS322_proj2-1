@@ -225,6 +225,31 @@ class ENfa:
         print('Final state')
         print(','.join(self.final))
 
+    def print_self_file(self):
+        f = open("output_"+sys.argv[1]+".txt", 'w')
+        f.write('State')
+        f.write('\n')
+        f.write(','.join(self.state))
+        f.write('\n')
+        f.write('Input symbol')
+        f.write('\n')
+        f.write(','.join(self.symbol))
+        f.write('\n')
+        f.write('State transition function')
+        f.write('\n')
+        for q in my_sorted(list(self.func_dict.keys())):
+            for sym in sorted(list(self.func_dict[q])):
+                f.write(q + ',' + sym + ',' + self.transition(q, sym))
+                f.write('\n')
+        f.write('Initial state')
+        f.write('\n')
+        f.write(','.join(self.initial))
+        f.write('\n')
+        f.write('Final state')
+        f.write('\n')
+        f.write(','.join(self.final))
+        f.close()
+
 
 class Dfa(ENfa):
     def __init__(self, state, symbol, func_string_list, initial, final):
@@ -275,10 +300,10 @@ def main():
 
     e_nfa = ENfa(q, sigma, func_string_list, q0, f)
     e_nfa.convert_to_dfa()
-    e_nfa.print_self()
-    print('@@@@@@@@@@@@@@@@@')
+    # e_nfa.print_self()
     e_nfa.minimize()
-    e_nfa.print_self()
+    # e_nfa.print_self()
+    e_nfa.print_self_file()
 
 
 main()
