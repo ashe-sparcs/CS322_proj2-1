@@ -144,7 +144,7 @@ class ENfa:
             print(self.state)
             for s1 in self.state:
                 for s2 in self.state:
-                    if (s1 in self.final and s2 in self.final) or (s1 not in self.final and s2 not in self.final):
+                    if (s1 in self.final and s2 in self.final) and (s1 not in self.final and s2 not in self.final):
                         if my_sorted([s1, s2]) not in self.indistinguishable:
                             self.indistinguishable.append(my_sorted([s1, s2]))
                     else:
@@ -160,16 +160,17 @@ class ENfa:
         else:
             self.aggregate()
 
+    '''
     def aggregate(self):
         print('self.indistinguishable : ')
         print(self.indistinguishable)
         s = self.indistinguishable[0][0]
         substate = [s]
-        self.belong_dict[s] = substate
         for pair in self.indistinguishable:
             if s in pair:
                 substate.append(pair[1])
                 self.belong_dict[pair[1]] = substate
+        self.belong_dict[s] = substate
         self.state_aggregating.append(substate)
         indistinguishable_copy = list(self.indistinguishable)
         self.indistinguishable = []
@@ -179,6 +180,10 @@ class ENfa:
         if self.indistinguishable:
             self.aggregate()
         else:
+            for s in self.state:
+                if s not in sum(self.indistinguishable, []):
+                    self.state_aggregating.append([s])
+                    self.belong_dict[s] = [s]
             self.func_dict_converting = {}
             for substate in self.state_aggregating:
                 self.func_dict_aggregating[tuple(substate)] = {}
@@ -186,6 +191,26 @@ class ENfa:
                     if self.transition(substate[0], sym):
                         self.func_dict_aggregating[tuple(substate)][sym] = self.belong_dict[self.transition(substate[0], sym)]
             self.rename_aggregating()
+    '''
+
+    def find_intersection(self, m_list):
+        for i, v in enumerate(m_list):
+            for j, k in enumerate(m_list[i+1:], i+1):
+                if v & k:
+                    self.state_aggregating[i] = v.union(m_list.pop(j))
+                    return self.find_intersection(m_list)
+        return m_list
+
+    def aggregate(self):
+        self.state_aggregating = [set(i) for i in self.indistinguishable if i]
+        self.find_intersection(self.state_aggregating)
+        self.state_aggregating = [list(i) for i in self.state_aggregating if i]
+        for s in self.state:
+            if s not in sum(self.indistinguishable, []):
+                self.state_aggregating.append([s])
+        for substate in self.state_aggregating:
+            for s in substate:
+                self.belong_dict[s] = substate
 
     def is_distinguishable(self, pair):
         for sym in self.symbol:
@@ -222,6 +247,9 @@ def my_sorted(state_list):
     for i in range(len(state_list)):
         state_list[i] = 'q' + str(state_list[i])
     return state_list
+
+
+
 
 
 def main():
