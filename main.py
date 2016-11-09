@@ -5,7 +5,6 @@ class ENfa:
     state = []
     symbol = []
     func_dict = {}
-    # func_string_list = []
     initial = []
     final = []
     todo_queue = []
@@ -20,10 +19,8 @@ class ENfa:
     def __init__(self, state, symbol, func_string_list, initial, final):
         self.state = state
         self.symbol = symbol
-        # self.func_string_list = func_string_list
         for q in state:
             self.func_dict[q] = {}
-            # self.func_dict[q]['E'] = {}
         for func_string in func_string_list:
             func_string_split = func_string.split(',')
             if func_string_split[1] not in self.func_dict[func_string_split[0]].keys():
@@ -273,10 +270,7 @@ def xor(b1, b2):
 
 def main():
     dfa_filename = sys.argv[1]
-    # output = sys.argv[2]
     dfa_file = open(dfa_filename, 'r')
-    # output_file = open(output, 'w')
-
     dfa_file.readline()  # State
     q = dfa_file.readline().strip().split(',')  # state
     dfa_file.readline()  # Input symbol
@@ -292,17 +286,10 @@ def main():
     q0 = dfa_file.readline().strip().split(',')
     dfa_file.readline()  # Final State
     f = dfa_file.readline().strip().split(',')
-
-    # dfa = Dfa(q, sigma, func_string_list, q0, f)
-    # dfa.print_self()
-
     e_nfa = ENfa(q, sigma, func_string_list, q0, f)
     e_nfa.convert_to_dfa()
-    # e_nfa.print_self()
     e_nfa.minimize()
-    # e_nfa.print_self()
     e_nfa.print_self_file()
 
 
 main()
-
