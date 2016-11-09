@@ -40,21 +40,21 @@ class ENfa:
         return False
 
     def e_closure(self, substate):
-        result = list(substate)
+        result = set()
         for ss in substate:
-            closure = self.transition(ss, 'E')
-            if not closure:
-                continue
-            elif isinstance(closure, list):
-                print('-----------------result')
-                print(set(result))
-                print('---------------closure')
-                print(set(closure))
-                result = list(set(result) | set(closure))
-            else:
-                if closure not in result:
-                    result.append(closure)
-        return my_sorted(result)
+            result = result | self.dfs(ss)
+        return list(result)
+
+    def dfs(self, start):
+        visited, stack = set(), [start]
+        while stack:
+            vertex = stack.pop()
+            if vertex not in visited:
+                visited.add(vertex)
+                transition = self.transition(start, 'E')
+                if transition:
+                    stack.extend(set(self.transition(start, 'E')) - visited)
+        return visited
 
     def rename_converting(self):
         # renaming
@@ -117,8 +117,6 @@ class ENfa:
     def convert_to_dfa(self):
         # converting
         while self.todo_queue:
-            print('self.todo_queue : ')
-            print(self.todo_queue)
             from_substate = self.todo_queue[0]
             for sym in self.symbol:
                 to_substate = []
