@@ -46,9 +46,14 @@ class ENfa:
             if not closure:
                 continue
             elif isinstance(closure, list):
-                result = result + self.transition(ss, 'E')
+                print('-----------------result')
+                print(set(result))
+                print('---------------closure')
+                print(set(closure))
+                result = list(set(result) | set(closure))
             else:
-                result.append(closure)
+                if closure not in result:
+                    result.append(closure)
         return my_sorted(result)
 
     def rename_converting(self):
@@ -112,6 +117,8 @@ class ENfa:
     def convert_to_dfa(self):
         # converting
         while self.todo_queue:
+            print('self.todo_queue : ')
+            print(self.todo_queue)
             from_substate = self.todo_queue[0]
             for sym in self.symbol:
                 to_substate = []
@@ -120,11 +127,14 @@ class ENfa:
                     if not transition:
                         pass
                     elif isinstance(transition, list):
-                        to_substate = to_substate + transition
+                        to_substate = list(set(to_substate) | set(transition))
                     else:
-                        to_substate.append(transition)
+                        if transition not in to_substate:
+                            to_substate.append(transition)
                 if to_substate:
                     to_substate = self.e_closure(to_substate)
+                    print('to_substate : ')
+                    print(to_substate)
                 if to_substate and (to_substate not in self.state_converting):
                     self.state_converting.append(list(to_substate))
                     if to_substate not in self.todo_queue:
@@ -189,7 +199,7 @@ class ENfa:
             for sym in self.symbol:
                 if self.transition(substate[0], sym):
                     self.func_dict_aggregating[tuple(substate)][sym] = self.belong_dict[self.transition(substate[0], sym)]
-        print('self.func_dict_aggregating: ')
+        print('self.func_dict_aggregating : ')
         print(self.func_dict_aggregating)
         self.rename_aggregating()
 
@@ -197,7 +207,7 @@ class ENfa:
         for sym in self.symbol:
             transition1 = self.transition(pair[0], sym)
             transition2 = self.transition(pair[1], sym)
-            if my_sorted([transition1, transition2]) in self.distinguishable:
+            if xor(transition1, transition2) or my_sorted([transition1, transition2]) in self.distinguishable:
                 return True
         return False
 
