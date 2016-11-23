@@ -128,8 +128,6 @@ class ENfa:
                             to_substate.append(transition)
                 if to_substate:
                     to_substate = self.e_closure(to_substate)
-                    print('to_substate : ')
-                    print(to_substate)
                 if to_substate and (to_substate not in self.state_converting):
                     self.state_converting.append(list(to_substate))
                     if to_substate not in self.todo_queue:
@@ -145,8 +143,6 @@ class ENfa:
     def minimize(self):
         end_flag = True
         if not self.distinguishable:
-            print('self.state : ')
-            print(self.state)
             for s1 in self.state:
                 for s2 in self.state:
                     if (s1 not in self.final and s2 in self.final) or (s1 in self.final and s2 not in self.final):
@@ -221,7 +217,7 @@ class ENfa:
         print(','.join(self.final))
 
     def print_self_file(self):
-        f = open("output_"+sys.argv[1]+".txt", 'w')
+        f = open("output_"+sys.argv[1], 'w')
         f.write('State')
         f.write('\n')
         f.write(','.join(self.state))
@@ -289,7 +285,7 @@ def main():
     e_nfa = ENfa(q, sigma, func_string_list, q0, f)
     e_nfa.convert_to_dfa()
     e_nfa.minimize()
-    e_nfa.print_self_file()
+    e_nfa.print_self()
 
 
 main()
