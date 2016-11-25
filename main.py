@@ -48,7 +48,7 @@ class ENfa:
             vertex = stack.pop()
             if vertex not in visited:
                 visited.add(vertex)
-                transition = self.transition(start, 'E')
+                transition = self.transition(vertex, 'E')
                 if transition:
                     stack.extend(set(self.transition(start, 'E')) - visited)
         return visited
@@ -177,8 +177,6 @@ class ENfa:
         self.state_aggregating = [set(i) for i in self.indistinguishable if i]
         self.find_intersection(self.state_aggregating)
         self.state_aggregating = [list(i) for i in self.state_aggregating if i]
-        print('self.state_aggregating : ')
-        print(self.state_aggregating)
         for s in self.state:
             if s not in sum(self.indistinguishable, []):
                 self.state_aggregating.append([s])
@@ -190,8 +188,6 @@ class ENfa:
             for sym in self.symbol:
                 if self.transition(substate[0], sym):
                     self.func_dict_aggregating[tuple(substate)][sym] = self.belong_dict[self.transition(substate[0], sym)]
-        print('self.func_dict_aggregating : ')
-        print(self.func_dict_aggregating)
         self.rename_aggregating()
 
     def is_distinguishable(self, pair):
@@ -283,8 +279,12 @@ def main():
     dfa_file.readline()  # Final State
     f = dfa_file.readline().strip().split(',')
     e_nfa = ENfa(q, sigma, func_string_list, q0, f)
+    print(e_nfa.func_dict)
     e_nfa.convert_to_dfa()
+    print(e_nfa.func_dict)
+    e_nfa.print_self()
     e_nfa.minimize()
+    print(e_nfa.func_dict)
     e_nfa.print_self()
 
 
